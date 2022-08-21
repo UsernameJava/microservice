@@ -1,0 +1,97 @@
+server:
+  port: 8085
+#management.health.resilience4j.enabled: true
+
+
+
+spring:
+  cloud:
+    config:
+      enabled: false
+    service-registry:
+      auto-registration:
+        enabled: true
+  application:
+    name: resourceprocessor
+  rabbitmq:
+    host: rabbitmq
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  codec:
+    max-in-memory-size: 100MB
+
+resilience4j:
+
+  retry:
+    configs:
+      default:
+        registerHealthIndicator: true
+      consumeMessageFromQueue:
+        maxRetryAttempts: 5
+        waitDuration: 5s
+        resultPredicate: com.one.two.ResourceProcessor.retry.ConditionalRetryPredicate
+        registerHealthIndicator: true
+      sendDataToSongService:
+        maxRetryAttempts: 5
+        waitDuration: 5s
+        registerHealthIndicator: true
+        retryExceptions:
+          - java.lang.RuntimeException
+        #enableExponentialBackoff: true
+        #exponentialBackoffMultiplier: 2
+        #enableRandomizedWait: true
+        #randomizedWaitFactor: 0.5
+        #retryExceptions:
+          #- java.lang.Exception
+        #ignoreExceptions:
+          #- com.one.two.exception.BusinessException
+resilience4j.circuitbreaker:
+  instances:
+    circuitBreaker:
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 5
+      failureRateThreshold: 50
+      permittedNumberOfCallsInHalfOpenState: 2
+      #minimumNumberOfCalls: 3
+      waitDurationInOpenState: 20s
+
+
+eureka:
+  client:
+    enabled: true
+    serviceUrl:
+      registerWithEureka: true
+      defaultZone: http://eurekaservice:8761/eureka/
+    registryFetchIntervalSeconds: 50
+  instance:
+    instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    metadataMap:
+      instanceId: ${vcap.application.instance_id:${spring.application.name}:${spring.application.instance_id:${random.value}}}
+    leaseRenewalIntervalInSeconds: 100
+
+logging:
+  file:
+    name: /log/resource-processor-service.log
+  level:
+    com:
+      netflix:
+        eureka: OFF
+        discovery: OFF
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true

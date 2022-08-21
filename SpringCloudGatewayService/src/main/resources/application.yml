@@ -1,0 +1,51 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: springcloudgatewayservice
+#  cloud:
+#    gateway:
+#      routes:
+#        - id: ingredients
+#          uri: lb://ingredients
+#          predicates:
+#            - Path=//ingredients/**
+#          filters:
+#            - name: Hystrix
+#              args:
+#                name: fetchIngredients
+#                fallbackUri: forward:/fallback
+#        - id: ingredients-fallback
+#          uri: http://localhost:9994
+#          predicates:
+#            - Path=/fallback
+logging:
+  file:
+    name: /log/spring-cloud-gateway-service.log
+  level:
+    com:
+      netflix:
+        eureka: ERROR
+        discovery: ERROR
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eurekaservice:8761/eureka/
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true

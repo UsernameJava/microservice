@@ -1,0 +1,28 @@
+version: "3"
+services:
+  resourceprocessor:
+    image: resourceprocessor
+    restart: always
+    ports:
+      - "8087:8087"
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    networks:
+      - resourceprocessor-rabbitmq
+      - songservice-mysqldb_1
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3.10-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - resourceprocessor-rabbitmq
+      - songservice-mysqldb_1
+
+networks:
+  resourceprocessor-rabbitmq:
+  songservice-mysqldb_1:

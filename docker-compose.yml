@@ -1,0 +1,182 @@
+version: "3"
+services:
+  songservice:
+    image: songservice
+    #restart: always
+    ports:
+      - "8084:8084"
+    networks:
+      - songservice-mysqldb_1
+    volumes:
+      - ./log:/log
+    depends_on:
+      - mysqldb
+
+  storageservice:
+    image: storageservice
+    networks:
+      - songservice-mysqldb_1
+    volumes:
+      - ./log:/log
+    ports:
+      - "8087:8087"
+    depends_on:
+      - mysqldbstorage
+
+  resourceprocessor:
+    image: resourceprocessor
+    #restart: always
+    volumes:
+      - ./log:/log
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_RABBITMQ_HOST=${RABBITMQ_HOST}
+    networks:
+      - songservice-mysqldb_1
+    depends_on:
+      - rabbitmq
+
+  resourceservice:
+    image: resourceservice
+    #restart: always
+    volumes:
+      - ./log:/log
+    ports:
+      - "8086:8086"
+    networks:
+      - songservice-mysqldb_1
+    depends_on:
+        - mysqldbrs
+        - localstack
+        - rabbitmq
+
+  springcloudgatewayservice:
+    image: gatewayservice
+    volumes:
+      - ./log:/log
+    ports:
+      - "8088:8088"
+    networks:
+      - songservice-mysqldb_1
+
+  mysqldb:
+    image: mysql:8
+    restart: always
+    networks:
+      - songservice-mysqldb_1
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQLDB_PASS}
+      - MYSQL_DATABASE=${SONG_SERVICE_DB_NAME}
+    volumes:
+      - ./SongService/dump:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+
+  mysqldbrs:
+    image: mysql:8
+    restart: always
+    networks:
+      - songservice-mysqldb_1
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQLDB_PASS}
+      - MYSQL_DATABASE=${RESOURCE_SERVICE_DB_NAME}
+#    ports:
+#      - "3307:3307"
+#    expose:
+#        - 3307
+    volumes:
+      - ./ResourceServiceV1/dump:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+
+  mysqldbstorage:
+    image: mysql:8
+    restart: always
+    networks:
+      - songservice-mysqldb_1
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQLDB_PASS}
+      - MYSQL_DATABASE=${STORAGE_SERVICE_DB_NAME}
+    volumes:
+      - ./StorageService/dump:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+
+  rabbitmq:
+    image: rabbitmq:3.10-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - songservice-mysqldb_1
+
+  localstack:
+    image: localstack/localstack
+    restart: always
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    networks:
+      - songservice-mysqldb_1
+    volumes:
+      - ./ResourceServiceV1/aws:/docker-entrypoint-initaws.d
+
+  eurekaservice:
+    image: springcloud/eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - songservice-mysqldb_1
+
+  grafana:
+    build: './config/grafana'
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - songservice-mysqldb_1
+#      monitoring:
+#        aliases:
+#          - grafana
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus:/prometheus
+    networks:
+      - songservice-mysqldb_1
+#      monitoring:
+#        aliases:
+#          - prometheus
+  loki:
+    image: grafana/loki:2.2.1
+    container_name: loki-service
+    volumes:
+      - ./loki:/etc/loki/
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki.yml
+    networks:
+      - songservice-mysqldb_1
+
+  promtail:
+    image: grafana/promtail:2.2.1
+    container_name: promtail-service
+    volumes:
+      - ./log:/var/log/
+      - ./promtail:/etc/promtail/
+    command: -config.file=/etc/promtail/promtail.yml
+    networks:
+      - songservice-mysqldb_1
+
+
+networks:
+  songservice-mysqldb_1:

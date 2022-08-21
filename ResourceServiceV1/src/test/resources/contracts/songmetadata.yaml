@@ -1,0 +1,10 @@
+label: song-metadata
+input:
+  triggeredBy: testSendEvent()
+outputMessage:
+  sentTo: resourceservice_exchange
+  body:
+    id: 33
+    name: Die Antwort
+  headers:
+    contentType: application/json
