@@ -6,6 +6,7 @@ target/
 
 log
 log/*
+prometheus/*
 
 ### STS ###
 .apt_generated
