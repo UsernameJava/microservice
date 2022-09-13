@@ -5,28 +5,32 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MessagingConfig {
-    public static final String QUEUE = "resourceservice_queue";
-    public static final String EXCHANGE = "resourceservice_exchange";
-    public static final String ROUTING_KEY = "resourceservice_routingKey";
+    @Value("${queue.queue}")
+    private String queue;
+    @Value("${queue.exchange}")
+    private String exchange;
+    @Value("${queue.routingkey}")
+    private String routingKey;
 
     @Bean
     public Queue queue() {
-        return new Queue(QUEUE);
+        return new Queue(queue);
     }
 
     @Bean
     public TopicExchange exchange() {
-        return new TopicExchange(EXCHANGE);
+        return new TopicExchange(exchange);
     }
 
     @Bean
     public Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY);
+        return BindingBuilder.bind(queue).to(exchange).with(routingKey);
     }
 
     @Bean

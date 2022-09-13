@@ -41,8 +41,8 @@ public class ResourceProcessorConsumer {
     @Autowired (required = false)
     private RetryRegistry registry;
 
-    @RabbitListener(queues = MessagingConfig.QUEUE)
-    //@Retry(name = "consumeMessageFromQueue")
+    @RabbitListener(queues = "resourceservice_queue")
+    @Retry(name = "consumeMessageFromQueue")
     public void consumeMessageFromQueue(SongMetadata songMetadata) throws Exception {
         LOGGER.info("Message received from queue:" + songMetadata);
         songMetadata.setId(0);
