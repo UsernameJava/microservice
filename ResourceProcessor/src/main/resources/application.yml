@@ -112,3 +112,6 @@ baseurl:
   resourceservice: "http://resourceservice:8086"
 
 timeout: 10000
+
+circuitbreaker:
+  name: "StorageService"
