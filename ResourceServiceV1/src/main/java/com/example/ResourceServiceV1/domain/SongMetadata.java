@@ -33,6 +33,9 @@ public class SongMetadata {
     @Column(name = "filename")
     private String fileName;
 
+    @Column(name = "status")
+    private String status;
+
     //@Column(name = "resourceId")
     @Transient
     private String resourceId;
@@ -109,17 +112,25 @@ public class SongMetadata {
         this.traceId = traceId;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SongMetadata that = (SongMetadata) o;
-        return id == that.id && Objects.equals(name, that.name) && Objects.equals(traceId, that.traceId) && Objects.equals(artist, that.artist) && Objects.equals(album, that.album) && Objects.equals(length, that.length) && Objects.equals(year, that.year) && Objects.equals(fileName, that.fileName) && Objects.equals(resourceId, that.resourceId);
+        return id == that.id && Objects.equals(name, that.name) && Objects.equals(traceId, that.traceId) && Objects.equals(artist, that.artist) && Objects.equals(album, that.album) && Objects.equals(length, that.length) && Objects.equals(year, that.year) && Objects.equals(fileName, that.fileName) && Objects.equals(status, that.status) && Objects.equals(resourceId, that.resourceId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, traceId, artist, album, length, year, fileName, resourceId);
+        return Objects.hash(id, name, traceId, artist, album, length, year, fileName, status, resourceId);
     }
 
     @Override
@@ -133,6 +144,7 @@ public class SongMetadata {
                 ", length='" + length + '\'' +
                 ", year='" + year + '\'' +
                 ", fileName='" + fileName + '\'' +
+                ", status='" + status + '\'' +
                 ", resourceId='" + resourceId + '\'' +
                 '}';
     }

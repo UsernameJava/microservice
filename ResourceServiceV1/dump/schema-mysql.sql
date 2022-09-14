@@ -7,5 +7,6 @@ CREATE TABLE `resource_service_song_metadata` (
   `year` varchar(45) DEFAULT NULL,
   `filename` varchar(245) DEFAULT NULL,
   `traceid` varchar(245) DEFAULT NULL,
+  `status` varchar(245) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci

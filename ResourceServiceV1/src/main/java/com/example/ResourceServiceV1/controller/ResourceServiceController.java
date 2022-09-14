@@ -51,15 +51,18 @@ public class ResourceServiceController {
         songMetadata.setFileName(fileName);
         songMetadata.setLength(String.valueOf(file.getSize()));
         songMetadata.setTraceId(traceId);
-        resourceMetadataService.addSongMetadata(songMetadata);
+
         String result = "0";
+        String stagingBucketName = storageService.extractStagingBucketName();
         try {
-            result = resourceService.saveFile(storageService.extractStagingBucketName(), fileName, Optional.of(metadata), file.getInputStream());
+            result = resourceService.saveFile(stagingBucketName, fileName, Optional.of(metadata), file.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         response.put("id", result);
         songMetadata.setResourceId(result);
+        songMetadata.setStatus("File saved in staging bucket with name:" + stagingBucketName);
+        resourceMetadataService.addSongMetadata(songMetadata);
 
         try {
             resourcePublisher.sendEvent(songMetadata);
