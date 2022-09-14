@@ -4,6 +4,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,10 +20,14 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class WebClientConfiguration {
-    private static final String SONG_SERVICE_BASE_URL = "http://songservice:8084"; //8084
-    private static final String RESOURCE_SERVICE_BASE_URL = "http://resourceservice:8086"; //8086
-    private static final String STORAGE_SERVICE_BASE_URL = "http://storageservice:8087"; //8087
-    public static final int TIMEOUT = 10000;
+    @Value("${baseurl.songservice}")
+    private String songServiceBaseUrl;
+    @Value("${baseurl.resourceservice}")
+    private String resourceServiceBaseUrl;
+    @Value("${baseurl.storageservice}")
+    private String storageServiceBaseUrl;
+    @Value("${timeout}")
+    private int timeout;
 
     @Bean
     @Qualifier("songservice")
@@ -30,14 +35,14 @@ public class WebClientConfiguration {
     public WebClient songServiceWebClientWithTimeout() {
         final var tcpClient = TcpClient
                 .create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, TIMEOUT)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout)
                 .doOnConnected(connection -> {
-                    connection.addHandlerLast(new ReadTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
-                    connection.addHandlerLast(new WriteTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new ReadTimeoutHandler(timeout, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new WriteTimeoutHandler(timeout, TimeUnit.MILLISECONDS));
                 });
 
         return WebClient.builder()
-                .baseUrl(SONG_SERVICE_BASE_URL)
+                .baseUrl(songServiceBaseUrl)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
@@ -54,14 +59,14 @@ public class WebClientConfiguration {
 
         final var tcpClient = TcpClient
                 .create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, TIMEOUT)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout)
                 .doOnConnected(connection -> {
-                    connection.addHandlerLast(new ReadTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
-                    connection.addHandlerLast(new WriteTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new ReadTimeoutHandler(timeout, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new WriteTimeoutHandler(timeout, TimeUnit.MILLISECONDS));
                 });
 
         return WebClient.builder()
-                .baseUrl(RESOURCE_SERVICE_BASE_URL)
+                .baseUrl(resourceServiceBaseUrl)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchangeStrategies(strategies)
@@ -74,14 +79,14 @@ public class WebClientConfiguration {
     public WebClient storageServiceWebClientWithTimeout() {
         final var tcpClient = TcpClient
                 .create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, TIMEOUT)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout)
                 .doOnConnected(connection -> {
-                    connection.addHandlerLast(new ReadTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
-                    connection.addHandlerLast(new WriteTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new ReadTimeoutHandler(timeout, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new WriteTimeoutHandler(timeout, TimeUnit.MILLISECONDS));
                 });
 
         return WebClient.builder()
-                .baseUrl(STORAGE_SERVICE_BASE_URL)
+                .baseUrl(storageServiceBaseUrl)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();

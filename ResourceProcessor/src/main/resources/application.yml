@@ -95,3 +95,23 @@ management:
     distribution:
       percentiles-histogram:
         "[http.server.requests]": true
+
+aws:
+  accesskey: "accessKey"
+  secretkey: "secretKey"
+  serviceendpoint: "http://localstack:4566"
+
+queue:
+  exchange: "resourceservice_exchange"
+  queue: "resourceservice_queue"
+  routingkey: "resourceservice_routingKey"
+
+baseurl:
+  storageservice: "http://storageservice:8087"
+  songservice: "http://songservice:8084"
+  resourceservice: "http://resourceservice:8086"
+
+timeout: 10000
+
+circuitbreaker:
+  name: "StorageService"

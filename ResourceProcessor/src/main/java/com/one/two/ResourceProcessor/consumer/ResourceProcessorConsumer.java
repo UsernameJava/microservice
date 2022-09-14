@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -41,12 +42,12 @@ public class ResourceProcessorConsumer {
     @Autowired (required = false)
     private RetryRegistry registry;
 
-    @RabbitListener(queues = MessagingConfig.QUEUE)
-    //@Retry(name = "consumeMessageFromQueue")
+    @RabbitListener(queues = "resourceservice_queue")
+    @Retry(name = "consumeMessageFromQueue")
+    @Transactional
     public void consumeMessageFromQueue(SongMetadata songMetadata) throws Exception {
         LOGGER.info("Message received from queue:" + songMetadata);
-        songMetadata.setId(0);
-        sendDataToSongService(songMetadata);
+
         //get file from the resource service by resource id
         ByteArrayResource response = resourceServiceWebClient.get()
                 .uri("resources/" + songMetadata.getResourceId())
@@ -58,6 +59,10 @@ public class ResourceProcessorConsumer {
         String permanentBucketName = storageService.extractPermanentBucketName();
         LOGGER.info("Permanent Bucket Name:" + permanentBucketName);
         amazonS3.putObject(permanentBucketName, UUID.randomUUID().toString(), response.getInputStream(), null);
+
+        songMetadata.setId(0);
+        songMetadata.setStatus("File saved in permanent bucket with name:" + permanentBucketName);
+        sendDataToSongService(songMetadata);
     }
 
     //@Retry(name = "sendDataToSongService")

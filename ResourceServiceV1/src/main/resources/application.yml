@@ -71,3 +71,13 @@ management:
     distribution:
       percentiles-histogram:
         "[http.server.requests]": true
+
+aws:
+  accesskey: "accessKey"
+  secretkey: "secretKey"
+  serviceendpoint: "http://localstack:4566"
+
+baseurl:
+  storageservice: "http://storageservice:8087"
+
+timeout: 10000

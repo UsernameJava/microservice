@@ -1,5 +1,5 @@
-8088 Spring cloud gateway service
-8084 Song service
-8087 Storage service
-8086 Resource Service
-8085 Resource Processor
+8088 Spring cloud gateway service    gatewayservice
+8084 Song service                    songservice
+8087 Storage service                 storageservice
+8086 Resource Service                resourceservice
+8085 Resource Processor              resourceprocessor

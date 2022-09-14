@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS `song_metadata` (
   `resource_id` varchar(45) DEFAULT NULL,
   `filename` varchar(245) DEFAULT NULL,
   `traceid` varchar(245) DEFAULT NULL,
+  `status` varchar(245) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=190 DEFAULT CHARSET=utf8mb3
